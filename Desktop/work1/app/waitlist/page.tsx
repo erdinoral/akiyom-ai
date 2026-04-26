@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 const waitlistStars = Array.from({ length: 72 }, (_, i) => {
@@ -50,7 +49,6 @@ const promoSlides = [
 ];
 
 export default function WaitlistPage() {
-  const searchParams = useSearchParams();
   const backgroundVideoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const crossfadeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const manualSlideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -88,11 +86,12 @@ export default function WaitlistPage() {
   }, []);
 
   useEffect(() => {
-    const refFromUrl = searchParams.get("ref");
+    const params = new URLSearchParams(window.location.search);
+    const refFromUrl = params.get("ref");
     if (refFromUrl) {
       setInviteCode(refFromUrl.toUpperCase());
     }
-  }, [searchParams]);
+  }, []);
 
   useEffect(() => {
     const firstVideo = backgroundVideoRefs.current[0];
