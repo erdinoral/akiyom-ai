@@ -3,22 +3,25 @@ import type { NextRequest } from "next/server";
 
 const WAITLIST_PATH = "/waitlist";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isWaitlist = pathname === WAITLIST_PATH;
+  const isWaitlist = pathname === WAITLIST_PATH || pathname.startsWith(`${WAITLIST_PATH}/`);
   const isApiRoute = pathname.startsWith("/api");
   const isNextAsset = pathname.startsWith("/_next");
   const isFavicon = pathname === "/favicon.ico";
-  const isStaticFile = /\.[a-zA-Z0-9]+$/.test(pathname);
+  const isStaticFile = pathname.split("/").pop()?.includes(".") ?? false;
 
   if (isWaitlist || isApiRoute || isNextAsset || isFavicon || isStaticFile) {
     return NextResponse.next();
   }
 
-  return NextResponse.redirect(new URL(WAITLIST_PATH, request.url));
+  const url = request.nextUrl.clone();
+  url.pathname = WAITLIST_PATH;
+  url.search = "";
+  return NextResponse.redirect(url);
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/:path*"],
 };
