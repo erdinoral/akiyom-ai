@@ -91,6 +91,11 @@ export default function WaitlistPage() {
     if (refFromUrl) {
       setInviteCode(refFromUrl.toUpperCase());
     }
+
+    const savedReferralCode = window.localStorage.getItem("akiyom_referral_code");
+    if (savedReferralCode) {
+      setYourReferralCode(savedReferralCode);
+    }
   }, []);
 
   useEffect(() => {
@@ -165,6 +170,9 @@ export default function WaitlistPage() {
       setSignupBonusCredits(payload.signupBonusCredits ?? null);
       setYourReferralCode(payload.yourReferralCode ?? "");
       setInviterBonusAwarded(Boolean(payload.inviterBonusAwarded));
+      if (payload.yourReferralCode) {
+        window.localStorage.setItem("akiyom_referral_code", payload.yourReferralCode);
+      }
       setIsSubmitting(false);
     } catch {
       setSubmitError("Bağlantı hatası oluştu. Lütfen tekrar dene.");
@@ -198,6 +206,17 @@ export default function WaitlistPage() {
       setTimeout(() => setCopied(false), 1800);
     } catch {
       setSubmitError("Davet linki kopyalanamadı. Elle kopyalayabilirsin.");
+    }
+  };
+
+  const onCopyInviteCode = async () => {
+    if (!yourReferralCode) return;
+    try {
+      await navigator.clipboard.writeText(yourReferralCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setSubmitError("Davet kodu kopyalanamadı. Elle kopyalayabilirsin.");
     }
   };
 
@@ -280,25 +299,25 @@ export default function WaitlistPage() {
           ))}
         </div>
 
-        <form onSubmit={onSubmit} className="mx-auto mt-7 flex w-full max-w-[560px] flex-col gap-3">
+        <form onSubmit={onSubmit} className="mx-auto mt-7 flex w-full max-w-[620px] flex-col gap-3">
           <input
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="ornek@email.com"
-            className="h-12 flex-1 rounded-[16px] border border-white/10 bg-black/45 px-4 text-sm text-[#f2f2f5] outline-none placeholder:text-[#7f828b] focus:border-[#9aa8ff66]"
+            className="h-14 flex-1 rounded-[18px] border border-white/10 bg-black/45 px-5 text-base text-[#f2f2f5] outline-none placeholder:text-[#7f828b] focus:border-[#9aa8ff66]"
           />
           <input
             type="text"
             value={inviteCode}
             onChange={(event) => setInviteCode(event.target.value.toUpperCase())}
             placeholder="Davet kodu (opsiyonel) - AKIYOM-XXXXXX"
-            className="h-12 flex-1 rounded-[16px] border border-white/10 bg-black/45 px-4 text-sm text-[#f2f2f5] outline-none placeholder:text-[#7f828b] focus:border-[#9aa8ff66]"
+            className="h-14 flex-1 rounded-[18px] border border-white/10 bg-black/45 px-5 text-base text-[#f2f2f5] outline-none placeholder:text-[#7f828b] focus:border-[#9aa8ff66]"
           />
           <button
             type="submit"
             disabled={isSubmitting}
-            className="h-12 rounded-[16px] border border-[#9aa8ff66] bg-gradient-to-r from-[#8ca1ff24] to-[#b78dff24] px-6 text-sm transition-all hover:border-[#c8ceff88] hover:shadow-[0_0_28px_rgba(136,158,255,0.22)] disabled:cursor-not-allowed disabled:opacity-70 sm:self-end"
+            className="h-14 rounded-[18px] border border-[#9aa8ff66] bg-gradient-to-r from-[#8ca1ff24] to-[#b78dff24] px-8 text-base transition-all hover:border-[#c8ceff88] hover:shadow-[0_0_28px_rgba(136,158,255,0.22)] disabled:cursor-not-allowed disabled:opacity-70 sm:self-end"
           >
             {isSubmitting ? "Kaydediliyor..." : "Waitlist'e Katıl"}
           </button>
@@ -308,30 +327,47 @@ export default function WaitlistPage() {
           <div className="mt-3 rounded-xl border border-[#9aa8ff45] bg-[#8ca1ff17] p-3 text-left text-xs text-[#d8deff]">
             <p>Kaydın alındı. Açılışta sana haber vereceğiz.</p>
             {signupBonusCredits ? <p className="mt-1">Hesabına {signupBonusCredits} başlangıç kredisi tanımlandı.</p> : null}
-            {yourReferralCode ? <p className="mt-1">Davet kodun: {yourReferralCode}</p> : null}
+            {yourReferralCode ? <p className="mt-1">Davet kodun oluşturuldu: {yourReferralCode}</p> : null}
             {inviterBonusAwarded ? <p className="mt-1">Davet eden kullanıcıya ekstra kredi bonusu işlendi.</p> : null}
+          </div>
+        ) : null}
+        {submitError ? <p className="mt-3 text-xs text-[#ffb4b4]">{submitError}</p> : null}
+
+        {yourReferralCode ? (
+          <div className="mt-3 rounded-xl border border-white/10 bg-black/35 p-3 text-left">
+            <p className="text-xs text-[#c9cfdf]">Davet kodun</p>
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+              <input
+                readOnly
+                value={yourReferralCode}
+                className="h-11 flex-1 rounded-md border border-white/10 bg-black/45 px-3 text-sm text-[#eef1ff] outline-none"
+              />
+              <button
+                type="button"
+                onClick={onCopyInviteCode}
+                className="h-11 rounded-md border border-[#9aa8ff66] bg-[#8ca1ff20] px-4 text-sm text-[#e2e7ff] transition hover:border-[#c8ceff88]"
+              >
+                {copied ? "Kopyalandı" : "Davet Kodunu Kopyala"}
+              </button>
+            </div>
             {inviteLink ? (
-              <div className="mt-2 rounded-lg border border-white/10 bg-black/35 p-2">
-                <p className="mb-1 text-[11px] text-[#aeb4c8]">Davet linkin</p>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <input
-                    readOnly
-                    value={inviteLink}
-                    className="h-9 flex-1 rounded-md border border-white/10 bg-black/45 px-2 text-[11px] text-[#eef1ff] outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={onCopyInviteLink}
-                    className="h-9 rounded-md border border-[#9aa8ff66] bg-[#8ca1ff20] px-3 text-[11px] text-[#e2e7ff] transition hover:border-[#c8ceff88]"
-                  >
-                    {copied ? "Kopyalandı" : "Linki Kopyala"}
-                  </button>
-                </div>
+              <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                <input
+                  readOnly
+                  value={inviteLink}
+                  className="h-10 flex-1 rounded-md border border-white/10 bg-black/45 px-3 text-xs text-[#dbe1f8] outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={onCopyInviteLink}
+                  className="h-10 rounded-md border border-[#9aa8ff66] bg-[#8ca1ff20] px-4 text-xs text-[#e2e7ff] transition hover:border-[#c8ceff88]"
+                >
+                  Linki Kopyala
+                </button>
               </div>
             ) : null}
           </div>
         ) : null}
-        {submitError ? <p className="mt-3 text-xs text-[#ffb4b4]">{submitError}</p> : null}
 
         <div className="mt-6 overflow-hidden rounded-2xl border border-[#9aa8ff45] bg-[#8ca1ff14] p-3 text-left md:p-4">
           <motion.p
