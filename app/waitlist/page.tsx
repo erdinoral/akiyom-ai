@@ -220,6 +220,14 @@ export default function WaitlistPage() {
     }
   };
 
+  const onCreateInviteCode = async () => {
+    if (!yourReferralCode) {
+      setSubmitError("Önce waitlist'e katıl, davet kodun otomatik oluşturulsun.");
+      return;
+    }
+    await onCopyInviteCode();
+  };
+
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-4 text-[#F5F5F5]">
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -299,28 +307,37 @@ export default function WaitlistPage() {
           ))}
         </div>
 
-        <form onSubmit={onSubmit} className="mx-auto mt-7 flex w-full max-w-[620px] flex-col gap-3">
+        <form onSubmit={onSubmit} className="mx-auto mt-7 flex w-full max-w-[700px] flex-col gap-3">
           <input
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="ornek@email.com"
-            className="h-14 flex-1 rounded-[18px] border border-white/10 bg-black/45 px-5 text-base text-[#f2f2f5] outline-none placeholder:text-[#7f828b] focus:border-[#9aa8ff66]"
+            className="h-16 flex-1 rounded-[18px] border border-white/10 bg-black/45 px-6 text-lg text-[#f2f2f5] outline-none placeholder:text-[#7f828b] focus:border-[#9aa8ff66]"
           />
           <input
             type="text"
             value={inviteCode}
             onChange={(event) => setInviteCode(event.target.value.toUpperCase())}
             placeholder="Davet kodu (opsiyonel) - AKIYOM-XXXXXX"
-            className="h-14 flex-1 rounded-[18px] border border-white/10 bg-black/45 px-5 text-base text-[#f2f2f5] outline-none placeholder:text-[#7f828b] focus:border-[#9aa8ff66]"
+            className="h-16 flex-1 rounded-[18px] border border-white/10 bg-black/45 px-6 text-lg text-[#f2f2f5] outline-none placeholder:text-[#7f828b] focus:border-[#9aa8ff66]"
           />
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="h-14 rounded-[18px] border border-[#9aa8ff66] bg-gradient-to-r from-[#8ca1ff24] to-[#b78dff24] px-8 text-base transition-all hover:border-[#c8ceff88] hover:shadow-[0_0_28px_rgba(136,158,255,0.22)] disabled:cursor-not-allowed disabled:opacity-70 sm:self-end"
-          >
-            {isSubmitting ? "Kaydediliyor..." : "Waitlist'e Katıl"}
-          </button>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="h-14 rounded-[18px] border border-[#9aa8ff66] bg-gradient-to-r from-[#8ca1ff24] to-[#b78dff24] px-8 text-base transition-all hover:border-[#c8ceff88] hover:shadow-[0_0_28px_rgba(136,158,255,0.22)] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {isSubmitting ? "Kaydediliyor..." : "Waitlist'e Katıl"}
+            </button>
+            <button
+              type="button"
+              onClick={onCreateInviteCode}
+              className="h-14 rounded-[18px] border border-white/15 bg-white/[0.04] px-8 text-base text-[#e4e8f7] transition-all hover:border-white/30 hover:text-white"
+            >
+              Davet Kodu Oluştur
+            </button>
+          </div>
         </form>
 
         {submitted ? (
